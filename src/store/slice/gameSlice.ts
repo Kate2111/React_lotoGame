@@ -2,28 +2,49 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 interface GameState {
-  firstPlayindField: number[];
-  secondPlayindField: number[];
+  firstPlayingField: number[];
+  secondPlayingField: number[];
 }
 
 const initialState: GameState = {
-  firstPlayindField: [],
-  secondPlayindField: [],
+  firstPlayingField: [],
+  secondPlayingField: [],
 };
 
 const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    setFirstPlayindField: (state, action: PayloadAction<number>) => {
-      state.firstPlayindField = [...state.firstPlayindField, action.payload];
+    setFirstPlayingField: (state, action: PayloadAction<number>) => {
+      const index = state.firstPlayingField.indexOf(action.payload);
+      if (index === -1) {
+        state.firstPlayingField.push(action.payload);
+      } else {
+        state.firstPlayingField.splice(index, 1);
+      }
     },
-    setSecondPlayindField: (state, action: PayloadAction<number>) => {
-      state.firstPlayindField = [...state.firstPlayindField, action.payload];
+    setSecondPlayingField: (state, action: PayloadAction<number>) => {
+      const index = state.secondPlayingField.indexOf(action.payload);
+      if (index === -1) {
+        state.secondPlayingField.push(action.payload);
+      } else {
+        state.secondPlayingField.splice(index, 1);
+      }
+    },
+    setRundomNumbersFirstPlayingField: (state, action: PayloadAction<number[]>) => {
+      state.firstPlayingField = action.payload;
+    },
+    setRundomNumbersSecondPlayingField: (state, action: PayloadAction<number[]>) => {
+      state.secondPlayingField = action.payload;
     },
   },
 });
 
-export const { setFirstPlayindField, setSecondPlayindField } = gameSlice.actions;
+export const {
+  setFirstPlayingField,
+  setSecondPlayingField,
+  setRundomNumbersFirstPlayingField,
+  setRundomNumbersSecondPlayingField,
+} = gameSlice.actions;
 export const gameState = (state: RootState) => state.games;
 export default gameSlice.reducer;
