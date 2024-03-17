@@ -2,8 +2,8 @@ import GamePage from '@/pages/GamePage';
 import ResultPage from '@/pages/ResultPage';
 
 export const AppRoutes = {
-  game: '/',
-  result: '/result',
+  game: '/React_lotogame',
+  result: '/React_lotogame/result',
 };
 interface RouteObject {
   path: string;
