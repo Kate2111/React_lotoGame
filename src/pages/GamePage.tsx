@@ -8,7 +8,9 @@ import {
   setRundomNumbersFirstPlayingField,
   setRundomNumbersSecondPlayingField,
 } from '@/store/slice/gameSlice';
+import { RequestData } from '@/types/api';
 import { generateRandomNumbers } from '@/utils/generateRandomNumbers';
+import { sendRequestWithRetry } from '@/utils/sendRequestWithRetry';
 import { FC, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -25,26 +27,7 @@ const GamePage: FC = () => {
   useEffect(() => {
     winningNumbersGame1.current = generateRandomNumbers(8, 19);
     winningNumbersGame2.current = generateRandomNumbers(1, 2);
-
-    console.log(winningNumbersGame1.current, winningNumbersGame2.current);
   }, []);
-
-  const showResult = () => {
-    const matchGame1 = firstPlayingField.filter((number) =>
-      winningNumbersGame1.current.includes(number),
-    ).length;
-    const matchGame2 = secondPlayingField === winningNumbersGame2.current;
-
-    console.log(firstPlayingField, secondPlayingField);
-
-    if (matchGame1 >= 4 || (matchGame1 >= 3 && matchGame2)) {
-      navigate(AppRoutes.result);
-    } else {
-      alert('К сожалению, вы не выиграли. Попробуйте ещё раз!');
-      dispatch(setRundomNumbersFirstPlayingField([]));
-      dispatch(setRundomNumbersSecondPlayingField([]));
-    }
-  };
 
   const iconHandler = () => {
     const numbersGame1 = generateRandomNumbers(8, 19);
@@ -52,6 +35,37 @@ const GamePage: FC = () => {
 
     dispatch(setRundomNumbersFirstPlayingField(numbersGame1));
     dispatch(setRundomNumbersSecondPlayingField(numbersGame2));
+  };
+
+  const showResult = async () => {
+    const matchGame1 = firstPlayingField.filter((number) =>
+      winningNumbersGame1.current.includes(number),
+    ).length;
+    const matchGame2 = secondPlayingField === winningNumbersGame2.current;
+
+    const isTicketWon = matchGame1 >= 4 || (matchGame1 >= 3 && matchGame2);
+
+    if (isTicketWon) {
+      navigate(AppRoutes.result);
+    } else {
+      alert('К сожалению, вы не выиграли. Попробуйте ещё раз!');
+      dispatch(setRundomNumbersFirstPlayingField([]));
+      dispatch(setRundomNumbersSecondPlayingField([]));
+    }
+
+    const requestData: RequestData = {
+      selectedNumbers: {
+        firstField: firstPlayingField,
+        secondField: secondPlayingField,
+      },
+      isTicketWon: isTicketWon,
+    };
+
+    try {
+      await sendRequestWithRetry('https://fakeurl.com/api/send-result', requestData, 0);
+    } catch (error) {
+      alert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте позже.');
+    }
   };
 
   return (
